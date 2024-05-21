@@ -1,23 +1,26 @@
-package ru.hogwarts.school.service;
+package ru.hogwarts.school.service.Impl;
 
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repository.StudentRepository;
+import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
-    private final HashMap<Long, Student> students = new HashMap<>();
 
-    private static Long idCounter = 1L;
+    private final StudentRepository studentRepository;
+
+    public StudentServiceImpl(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
 
     @Override
     public Student add(Student student) {
-        students.put(idCounter++, student);
-        return student;
+        return studentRepository.save(student);
     }
 
     @Override
