@@ -19,33 +19,32 @@ public class FacultyServiceImpl implements FacultyService {
 
     @Override
     public Faculty add(Faculty faculty) {
-        return facultyRepository.save(faculty);
+       return facultyRepository.save(faculty);
     }
 
     @Override
     public Faculty get(Long id) {
         return facultyRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+
     }
 
     @Override
     public Faculty update(Faculty faculty) {
-        if (faculties.containsKey(faculty.getId())) {
-            return faculties.put(faculty.getId(), faculty);
-        }
-        throw new EntityNotFoundException();
+        return facultyRepository.save(faculty);
+
+
     }
 
     @Override
     public Faculty remove(Long id) {
-        if (faculties.containsKey(id)) {
-            return faculties.remove(id);
-        }
-        throw new EntityNotFoundException();
+        Faculty faculty = get(id);
+        facultyRepository.deleteById(id);
+        return faculty;
     }
 
     @Override
     public Collection<Faculty> getByColor(String color) {
-        return faculties.values().stream()
+        return getAll().stream()
                 .filter(s -> s.getColor().equals(color))
                 .collect(Collectors.toList());
     }
@@ -53,6 +52,6 @@ public class FacultyServiceImpl implements FacultyService {
 
     @Override
     public Collection<Faculty> getAll() {
-        return faculties.values();
+        return facultyRepository.findAll();
     }
 }
