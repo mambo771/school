@@ -2,6 +2,7 @@ package ru.hogwarts.school.service;
 
 import ru.hogwarts.school.model.Student;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Collection;
 
 public interface StudentService {
@@ -13,7 +14,7 @@ public interface StudentService {
 
     Student remove(Long id);
 
-    Collection<Student> getByAge(Integer age);
+    Collection<Student> getByAge(Integer startAge, Integer endAge);
 
     Collection<Student> getAll();
 
