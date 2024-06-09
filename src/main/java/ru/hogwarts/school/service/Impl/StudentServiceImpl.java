@@ -43,10 +43,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Collection<Student> getByAge(Integer age) {
-        return getAll().stream()
-                .filter(s -> s.getAge().equals(age))
-                .collect(Collectors.toList());
+    public Collection<Student> getByAge(Integer startAge, Integer endAge) {
+        return studentRepository.findByAgeBetween(startAge,endAge);
     }
 
     @Override

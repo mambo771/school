@@ -46,9 +46,9 @@ public class FacultyController {
         return ResponseEntity.ok(faculty);
     }
     @GetMapping("by-color")
-    @Operation (summary = "Получение факультетов по цвету ")
-    public ResponseEntity <Collection<Faculty>> getByColor (@RequestParam String color){
-        Collection<Faculty> faculties= service.getByColor(color);
+    @Operation (summary = "Получение факультетов по имени и цвету ")
+    public ResponseEntity <Collection<Faculty>> getByColorOrName (@RequestParam String name, @RequestParam String color){
+        Collection<Faculty> faculties= service.getByColorOrName(name,color);
         return ResponseEntity.ok(faculties);
     }
     @GetMapping("all")
