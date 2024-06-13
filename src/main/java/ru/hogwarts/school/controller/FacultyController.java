@@ -56,7 +56,7 @@ public class FacultyController {
         Collection<Faculty> faculties= service.getAll();
         return ResponseEntity.ok(faculties);
     }
-    @GetMapping("students/{facultyid}")
+    @GetMapping("students/{facultyId}")
     @Operation (summary = "Получение студентов факультета")
     public ResponseEntity<Collection<Student>> getStudentsOfFaculty(@PathVariable Long facultyId){
         Collection<Student> students= service.getStudents(facultyId);
