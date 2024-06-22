@@ -3,11 +3,12 @@ package ru.hogwarts.school.service.Impl;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class FacultyServiceImpl implements FacultyService {
@@ -52,4 +53,12 @@ public class FacultyServiceImpl implements FacultyService {
     public Collection<Faculty> getAll() {
         return facultyRepository.findAll();
     }
+
+    @Override
+    public Collection<Student> getStudents(Long facultyId) {
+        return get(facultyId).getStudents();
+    }
+
+
 }
+
