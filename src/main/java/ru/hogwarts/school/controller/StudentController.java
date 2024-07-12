@@ -49,6 +49,7 @@ public class StudentController {
     @Operation (summary = "Получение студентов по возрасту")
     public ResponseEntity <Collection<Student>> getByAge (@RequestParam Integer startAge, @RequestParam Integer endAge){
         Collection<Student> students= service.getByAge(startAge, endAge);
+
         return ResponseEntity.ok(students);
     }
     @GetMapping("all")

@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,7 +41,8 @@ public class StudentControllerTestRestTemplateTest {
     private FacultyRepository facultyRepository;
 
     private final Faker faker = new Faker();
-    private final List<Student>students= new ArrayList<>(10);
+    private List<Student> students = new ArrayList<>(10);
+    private List<Faculty> faculties = new ArrayList<>(4);
 
 
     @AfterEach
@@ -54,8 +56,8 @@ public class StudentControllerTestRestTemplateTest {
         Faculty faculty1 = createFaculty();
         Faculty faculty2 = createFaculty();
 
-        createStudents (faculty1);
-        createStudents (faculty2);
+        createStudents(faculty1);
+        createStudents(faculty2);
 
     }
 
@@ -77,8 +79,10 @@ public class StudentControllerTestRestTemplateTest {
             student.setAge(faker.random().nextInt(11, 18));
             students.add(student);
         }
+        this.students.addAll(students);
         studentRepository.saveAll(students);
     }
+
 
     public String buildUrl(String uriStartsWithSlash) { // "http://localhost:8080/students"
         return "http://localhost:" + port + uriStartsWithSlash;
@@ -125,7 +129,6 @@ public class StudentControllerTestRestTemplateTest {
                 student,
                 Student.class
         );
-
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().getName()).isEqualTo(student.getName());
@@ -145,47 +148,99 @@ public class StudentControllerTestRestTemplateTest {
         Student student = new Student();
         student.setName(faker.harryPotter().character());
         student.setAge(faker.random().nextInt(11, 18));
-        studentRepository.save(student);
+        Student save = studentRepository.save(student);
 
-        ResponseEntity<Student> responseEntity = testRestTemplate.postForEntity(buildUrl(
-                        "/student"),
-                student,
-                Student.class
-        );
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
 
-        studentRepository.delete(student);
-        studentRepository.findAll();
+        testRestTemplate.delete(buildUrl(
+                "/student/" + save.getId()));
 
-        assertThat(responseEntity.getBody().getName()).isEqualTo(student.getName());
+        assertThat(studentRepository.getById(save.getId())).isNotNull();
+
 
     }
 
     @Test
     public void getStudentById() {
+        Student student = new Student();
+        student.setName(faker.harryPotter().character());
+        student.setAge(faker.random().nextInt(11, 18));
+        Student save = studentRepository.save(student);
+
+        ResponseEntity<Student> responseEntity = testRestTemplate.getForEntity(buildUrl(
+                        "/student" + save.getId()),
+                Student.class
+        );
+
+        assertThat(studentRepository.getById(save.getId())).isNotNull();
+
+
+    }
+
+
+    @Test
+    public void getStudentByAge() {
         int startAge = faker.random().nextInt(11, 18);
         int endAge = faker.random().nextInt(startAge, 20);
-        List <Student> expected = students.stream()
-                .filter(student->student.getAge()>=startAge && student.getAge()< endAge )
+
+        Collection<Student> expected = students.stream()
+                .filter(student -> student.getAge() >= startAge && student.getAge() <= endAge)
                 .toList();
 
 
-        ResponseEntity <List<Student>> responseEntity = testRestTemplate.exchange(buildUrl(
-                        "/student?by-age"),
+        ResponseEntity<Collection<Student>> responseEntity = testRestTemplate.exchange(buildUrl(
+                        "/student/by-age?startAge={startAge}&endAge={endAge}"),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {
+                new ParameterizedTypeReference<Collection<Student>>() {
                 },
                 Map.of("startAge", startAge, "endAge", endAge)
         );
-        List <Student> actual = responseEntity.getBody();
+        Collection<Student> actual = responseEntity.getBody();
+
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(actual).isNotNull();
 
-        assertThat(actual).usingRecursiveComparison()
-                .ignoringCollectionOrder()
-                .isEqualTo(expected);
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
+
+    }
+
+    @Test
+    public void getAllStudent() {
+        Student student = new Student();
+        student.setName(faker.harryPotter().character());
+        student.setAge(faker.random().nextInt(11, 18));
+        Student save = studentRepository.save(student);
+
+
+        ResponseEntity<Collection<Student>> responseEntity = testRestTemplate.exchange(buildUrl(
+                        "/student/all?"),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Collection<Student>>() {
+                }
+        );
+        Collection<Student> actual = responseEntity.getBody();
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(actual).isNotNull();
+
+
+    }
+
+    @Test
+    public void getFacultyByIdFinal() {
+        Student student = new Student();
+        student.setName(faker.harryPotter().character());
+        student.setAge(faker.random().nextInt(11, 18));
+        Student save = studentRepository.save(student);
+
+        ResponseEntity<Faculty> responseEntity = testRestTemplate.getForEntity(buildUrl(
+                        "/faculty" + save.getId()),
+                Faculty.class
+        );
+        assertThat(save.getFaculty()).isEqualTo(responseEntity.getBody());
+
+
     }
 
     @Test
@@ -193,6 +248,13 @@ public class StudentControllerTestRestTemplateTest {
         Faculty faculty = new Faculty();
         faculty.setName(faker.harryPotter().house());
         faculty.setColor(faker.color().name());
+        Faculty saveFaculty = facultyRepository.save(faculty);
+
+        Student student = new Student();
+        student.setName(faker.harryPotter().character());
+        student.setAge(faker.random().nextInt(11, 18));
+        student.setFaculty(saveFaculty);
+        Student saveStudents = studentRepository.save(student);
 
         ResponseEntity<Faculty> responseEntity = testRestTemplate.postForEntity(buildUrl(
                         "/faculty"),
@@ -213,6 +275,7 @@ public class StudentControllerTestRestTemplateTest {
                 .usingRecursiveComparison()
                 .isEqualTo(responseEntity.getBody());
     }
+
     @Test
     public void updateFaculty() {
         Faculty faculty = new Faculty();
@@ -234,25 +297,112 @@ public class StudentControllerTestRestTemplateTest {
         assertThat(responseEntity.getBody().getColor()).isEqualTo(faculty.getColor());
 
     }
+
+
     @Test
     public void deleteFaculty() {
         Faculty faculty = new Faculty();
         faculty.setName(faker.harryPotter().house());
         faculty.setColor(faker.color().name());
-        facultyRepository.save(faculty);
+        Faculty save = facultyRepository.save(faculty);
 
-        ResponseEntity<Faculty> responseEntity = testRestTemplate.postForEntity(buildUrl(
-                        "/faculty"),
-                faculty,
+
+        testRestTemplate.delete(buildUrl(
+                "/faculty/" + save.getId()));
+
+        assertThat(facultyRepository.getById(save.getId())).isNotNull();
+
+    }
+
+    @Test
+    public void getFacultyById() {
+        Faculty faculty = new Faculty();
+        faculty.setName(faker.harryPotter().house());
+        faculty.setColor(faker.color().name());
+        Faculty save = facultyRepository.save(faculty);
+
+
+        ResponseEntity<Faculty> responseEntity = testRestTemplate.getForEntity(buildUrl(
+                        "/faculty" + save.getId()),
                 Faculty.class
         );
+
+        assertThat(facultyRepository.getById(save.getId())).isNotNull();
+
+    }
+
+
+    @Test
+    public void getFacultyByColor() {
+
+        String name = faker.random().toString();
+        String color = faker.random().toString();
+
+        Collection<Faculty> expect = new ArrayList<>(faculties);
+
+        ResponseEntity<Collection<Faculty>> responseEntity = testRestTemplate.exchange(buildUrl(
+                        "/faculty/by-color?name={name}&color={color}"),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Collection<Faculty>>() {
+                },
+                Map.of("name", name, "color", color)
+        );
+        Collection<Faculty> actual = responseEntity.getBody();
+
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(actual).isNotNull();
 
-        facultyRepository.delete(faculty);
-        facultyRepository.findAll();
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expect);
 
-        assertThat(responseEntity.getBody().getName()).isEqualTo(faculty.getName());
+
+    }
+
+    @Test
+    public void getAllFaculty() {
+        Faculty faculty = new Faculty();
+        faculty.setName(faker.harryPotter().house());
+        faculty.setColor(faker.color().name());
+        Faculty save = facultyRepository.save(faculty);
+
+        ResponseEntity<Collection<Faculty>> responseEntity = testRestTemplate.exchange(buildUrl(
+                        "/faculty/all?"),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Collection<Faculty>>() {
+                }
+        );
+        Collection<Faculty> actual = responseEntity.getBody();
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(actual).isNotNull();
+    }
+
+    @Test
+    public void getStudentsByFaculty() {
+        Faculty faculty = new Faculty();
+        faculty.setName(faker.harryPotter().house());
+        faculty.setColor(faker.color().name());
+        Faculty saveFaculty = facultyRepository.save(faculty);
+
+        Student student = new Student();
+        student.setName(faker.harryPotter().character());
+        student.setAge(faker.random().nextInt(11, 18));
+        student.setFaculty(saveFaculty);
+        Student saveStudents = studentRepository.save(student);
+
+        System.out.println(saveStudents);
+        System.out.println(saveFaculty);
+
+        studentRepository.findById(saveStudents.getId());
+        facultyRepository.findById(saveFaculty.getId());
+        ResponseEntity<Student> responseEntity = testRestTemplate.getForEntity(buildUrl(
+                        "/students" + saveStudents.getId()),
+                Student.class
+        );
+        assertThat(saveStudents.getFaculty()).isEqualTo(responseEntity.getBody());
+
+
     }
 
 }
