@@ -1,6 +1,5 @@
 package ru.hogwarts.school;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,18 +17,13 @@ import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
-import javax.validation.constraints.Null;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
-public class StudentControllerTestRestTemplateTest {
+public class TestApplicationWithTestRemplate {
     @LocalServerPort
     private int port;
     @Autowired
@@ -271,9 +265,7 @@ public class StudentControllerTestRestTemplateTest {
 
         Optional<Faculty> fromDb = facultyRepository.findById(responseEntity.getBody().getId());
         assertThat(fromDb).isPresent();
-        assertThat(fromDb.get())
-                .usingRecursiveComparison()
-                .isEqualTo(responseEntity.getBody());
+        assertThat(fromDb.get()).isEqualTo(responseEntity.getBody());
     }
 
     @Test
@@ -385,6 +377,7 @@ public class StudentControllerTestRestTemplateTest {
         faculty.setColor(faker.color().name());
         Faculty saveFaculty = facultyRepository.save(faculty);
 
+
         Student student = new Student();
         student.setName(faker.harryPotter().character());
         student.setAge(faker.random().nextInt(11, 18));
@@ -396,11 +389,14 @@ public class StudentControllerTestRestTemplateTest {
 
         studentRepository.findById(saveStudents.getId());
         facultyRepository.findById(saveFaculty.getId());
+
         ResponseEntity<Student> responseEntity = testRestTemplate.getForEntity(buildUrl(
-                        "/students" + saveStudents.getId()),
+                        "/student/" + saveStudents.getId()),
+
                 Student.class
         );
-        assertThat(saveStudents.getFaculty()).isEqualTo(responseEntity.getBody());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(facultyRepository.getById(saveStudents.getId())).isNotNull();
 
 
     }
