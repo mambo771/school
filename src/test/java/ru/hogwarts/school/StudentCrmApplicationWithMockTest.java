@@ -48,7 +48,6 @@ public class StudentCrmApplicationWithMockTest {
 
     ObjectMapper objectMapper = new ObjectMapper();
     Student testStudent;
-    Faculty testFaculty;
 
     @BeforeEach
     void init() {
