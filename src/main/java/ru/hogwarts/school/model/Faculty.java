@@ -16,7 +16,7 @@ public class Faculty {
     private Long id;
     private String name;
     private String color;
-    @OneToMany(mappedBy = "faculty")
+    @OneToMany(mappedBy = "faculty", fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Student> students;
 
