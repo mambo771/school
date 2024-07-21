@@ -54,8 +54,8 @@ public class StudentCrmApplicationWithMockTest {
         Student testStudent1 = new Student(1L, "Harry", 15);
         Student testStudent2 = new Student(2L, "Hermione", 18);
         Student testStudent3 = new Student(3L, "Ron", 20);
-
-        Faculty testFaculty = new Faculty(1L, "Gryggindor", "Red");
+        testStudent = testStudent1;
+        Faculty testFaculty = new Faculty(1L, "Gryffindor", "Red");
 
         testStudent1.setFaculty(testFaculty);
         testStudent2.setFaculty(testFaculty);
@@ -85,6 +85,8 @@ public class StudentCrmApplicationWithMockTest {
         Mockito.verify(studentRepository).save(ArgumentMatchers.any(Student.class));
     }
 
+
+
     @Test
     void getingStudent() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
@@ -101,7 +103,7 @@ public class StudentCrmApplicationWithMockTest {
     @Test
     void putStudent() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/student/1")
+                        .put("/student/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testStudent))
                         .accept(MediaType.APPLICATION_JSON))
@@ -109,7 +111,7 @@ public class StudentCrmApplicationWithMockTest {
                 .andExpect(jsonPath("id").value(1L))
                 .andExpect(jsonPath("name").value("Harry"))
                 .andExpect(jsonPath("age").value(15));
-        Mockito.verify(studentRepository, times(2)).save(ArgumentMatchers.any(Student.class));
+        Mockito.verify(studentRepository).save(ArgumentMatchers.any(Student.class));
 
     }
 
@@ -129,7 +131,7 @@ public class StudentCrmApplicationWithMockTest {
     @Test
     void getFacultyByStudentId() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/faculty/1")
+                        .get("/student/faculty/1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("id").value(1L))
@@ -137,6 +139,7 @@ public class StudentCrmApplicationWithMockTest {
                 .andExpect(jsonPath("color").value("Red"));
         Mockito.verify(studentRepository).findById(ArgumentMatchers.anyLong());
     }
+
 
     @Test
     void getAllStudents() throws Exception {

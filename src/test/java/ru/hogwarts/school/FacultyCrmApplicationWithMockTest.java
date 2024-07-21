@@ -100,7 +100,7 @@ public class FacultyCrmApplicationWithMockTest {
     void putFaculty() throws Exception {
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/faculty/1")
+                        .put("/faculty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testFaculty))
                         .accept(MediaType.APPLICATION_JSON))
@@ -108,7 +108,7 @@ public class FacultyCrmApplicationWithMockTest {
                 .andExpect(jsonPath("id").value(1L))
                 .andExpect(jsonPath("name").value("Gryffindor"))
                 .andExpect(jsonPath("color").value("Red"));
-        Mockito.verify(facultyRepository, times(2)).save(ArgumentMatchers.any(Faculty.class));
+        Mockito.verify(facultyRepository, times(1)).save(ArgumentMatchers.any(Faculty.class));
 
 
     }
@@ -130,7 +130,7 @@ public class FacultyCrmApplicationWithMockTest {
     @Test
     void getStudentsByFacultyId() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/students/1")
+                        .get("/faculty/students/1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$").isArray())
