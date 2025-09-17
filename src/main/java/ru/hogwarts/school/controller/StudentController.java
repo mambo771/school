@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.model.StudentRQ;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("student")
@@ -63,6 +65,11 @@ public class StudentController {
     public ResponseEntity <Faculty> getFacultyOfStudent (@PathVariable  Long studentId){
         Faculty faculty = service.getFacultyOfStudent(studentId);
         return ResponseEntity.ok(faculty);
+    }
+    @GetMapping("total")
+    @Operation (summary = "Получение количества студентов в школе")
+    public List<StudentRQ> getTotal_Students(){
+        return service.getTotal_Students();
     }
 }
 
