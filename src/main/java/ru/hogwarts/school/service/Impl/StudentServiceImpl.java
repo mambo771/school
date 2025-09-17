@@ -4,10 +4,12 @@ import org.springframework.stereotype.Service;
 import ru.hogwarts.school.exception.EntityNotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.model.StudentRQ;
 import ru.hogwarts.school.repository.StudentRepository;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +22,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+
     public Student add(Student student) {
         return studentRepository.save(student);
     }
@@ -55,5 +58,9 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public Faculty getFacultyOfStudent(Long studentId) {
         return get(studentId).getFaculty();
+    }
+    @Override
+    public List<StudentRQ> getTotal_Students(){
+        return studentRepository.getTotal_Students();
     }
 }
